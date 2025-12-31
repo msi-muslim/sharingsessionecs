@@ -95,7 +95,7 @@ resource "aws_launch_template" "ecs" {
     device_name = "/dev/xvda"
 
     ebs {
-      volume_size           = 30
+      volume_size           = 10
       volume_type           = "gp3"
       delete_on_termination = true
     }
@@ -104,7 +104,7 @@ resource "aws_launch_template" "ecs" {
 
 resource "aws_autoscaling_group" "ecs" {
   name                = "ecs-asg"
-  desired_capacity    = 2
+  desired_capacity    = 1
   max_size            = 2
   min_size            = 1
   vpc_zone_identifier = [
