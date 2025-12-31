@@ -37,6 +37,8 @@ resource "aws_ecs_cluster" "this" {
   service_connect_defaults {
     namespace = aws_service_discovery_private_dns_namespace.ecs.arn
   }
+
+  
 }
 
 resource "aws_security_group" "ecs_ec2_sg" {
@@ -104,7 +106,7 @@ resource "aws_launch_template" "ecs" {
 
 resource "aws_autoscaling_group" "ecs" {
   name                = "ecs-asg"
-  desired_capacity    = 1
+  desired_capacity    = 2
   max_size            = 2
   min_size            = 1
   vpc_zone_identifier = [
@@ -462,6 +464,14 @@ resource "aws_ecs_task_definition" "efs_client_sc" {
       name      = "client"
       image     = "curlimages/curl:8.5.0"
       essential = true
+    
+     portMappings = [
+        {
+          containerPort = 8080   # dummy
+          name          = "http"
+          protocol      = "tcp"
+        }
+    ]
 
      command = [
       "sh",
@@ -498,8 +508,17 @@ resource "aws_ecs_service" "efs_client_sc" {
   }
 
   service_connect_configuration {
-    enabled = true
-  }
+      enabled = true
+
+      # service {
+      #   port_name      = "http"
+      #   discovery_name = "efs-api-client"
+      #   client_alias {
+      #     dns_name = "efs-api-client"
+      #     port     = 3000
+      #   }
+      # }
+    }
 }
 
 
