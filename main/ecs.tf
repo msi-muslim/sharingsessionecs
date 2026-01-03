@@ -37,7 +37,6 @@ resource "aws_ecs_cluster" "this" {
   service_connect_defaults {
     namespace = aws_service_discovery_private_dns_namespace.ecs.arn
   }
-
   
 }
 
@@ -62,12 +61,9 @@ resource "aws_security_group" "ecs_ec2_sg" {
   tags = {
     Name = "ecs-ec2-sg"
   }
+
+
 }
-
-
-
-
-
 locals {
   ecs_user_data = <<-EOF
     #!/bin/bash
@@ -119,7 +115,11 @@ resource "aws_autoscaling_group" "ecs" {
     version = "$Latest"
   }
 
-
+  tag {
+    key                 = "AmazonECSManaged"
+    propagate_at_launch = true
+    value = ""
+  }
 }
 
 resource "aws_ecs_capacity_provider" "this" {
@@ -258,6 +258,10 @@ resource "aws_ecs_task_definition" "efs_test" {
       }
     }
   ])
+
+  tags = {
+    Service     = "efs-test-task"
+  }
 }
 
 resource "aws_ecs_service" "efs_test" {
@@ -284,6 +288,10 @@ resource "aws_ecs_service" "efs_test" {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
     container_name   = "efs-test"
     container_port   = 3000
+  }
+
+  tags = {
+      service = "efs-test-service"
   }
 
 }
@@ -348,6 +356,9 @@ resource "aws_security_group" "ecs_sc_sg" {
 }
 
 resource "aws_ecs_task_definition" "efs_api_sc" {
+  tags = {
+    Service     = "efs-api-sc"
+  }
   family                   = "efs-api-sc"
   requires_compatibilities = ["EC2"]
   network_mode             = "awsvpc"
@@ -446,6 +457,13 @@ resource "aws_ecs_service" "efs_api_sc" {
     }
   }
 
+    tags = {
+      service = "efs-api-sc"
+  }
+
+  enable_ecs_managed_tags = true
+  propagate_tags          = "SERVICE"
+
 }
 
 resource "aws_ecs_task_definition" "efs_client_sc" {
@@ -489,6 +507,10 @@ resource "aws_ecs_task_definition" "efs_client_sc" {
       }
     }
   ])
+ 
+  tags = {
+    Service     = "efs-client-sc"
+  }
 }
 
 
@@ -519,6 +541,12 @@ resource "aws_ecs_service" "efs_client_sc" {
       #   }
       # }
     }
+
+  tags = {
+      service = "efs-client-sc"
+  }
+  enable_ecs_managed_tags = true
+  propagate_tags          = "SERVICE"
 }
 
 
