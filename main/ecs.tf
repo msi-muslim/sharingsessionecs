@@ -272,9 +272,6 @@ resource "aws_ecs_service" "efs_test" {
   desired_count = 1
   launch_type   = "EC2"
 
-  deployment_minimum_healthy_percent = 0
-  deployment_maximum_percent         = 100
-
   enable_ecs_managed_tags = true
   propagate_tags          = "SERVICE"
 
