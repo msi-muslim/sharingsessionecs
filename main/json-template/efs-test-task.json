@@ -1,0 +1,77 @@
+{
+    "family": "efs-test-task",
+    "containerDefinitions": [
+        {
+            "name": "efs-test",
+            "image": "priahitammsi/ecsharingsession:v2",
+            "cpu": 128,
+            "memory": 256,
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "hostPort": 3000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "EFS_PATH",
+                    "value": "/mnt/efs"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "efs-volume",
+                    "containerPath": "/mnt/efs",
+                    "readOnly": false
+                }
+            ],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/efs-test",
+                    "awslogs-region": "ap-southeast-3",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "node -e \"require('http').get('http://localhost:3000/health', r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 10
+            },
+            "systemControls": []
+        }
+    ],
+    "taskRoleArn": "arn:aws:iam::404584456413:role/ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::404584456413:role/ecs-execution-role",
+    "networkMode": "awsvpc",
+    "volumes": [
+        {
+            "name": "efs-volume",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-002ea197be85a9bf1",
+                "rootDirectory": "/v1",
+                "transitEncryption": "ENABLED"
+            }
+        }
+    ],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "cpu": "128",
+    "memory": "256",
+    "tags": [
+        {
+            "key": "Service",
+            "value": "efs-test-task"
+        }
+    ]
+}
